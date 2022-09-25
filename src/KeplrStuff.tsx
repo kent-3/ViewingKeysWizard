@@ -2,7 +2,7 @@ import { Button } from "@material-ui/core";
 import { FileCopyOutlined } from "@material-ui/icons";
 import React, { useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
-import { BroadcastMode, SigningCosmWasmClient } from "secretjs";
+import { SecretNetworkClient } from "secretjs";
 import { SecretAddress } from "./tokens";
 
 export function KeplrPanel({
@@ -11,8 +11,8 @@ export function KeplrPanel({
   myAddress,
   setMyAddress,
 }: {
-  secretjs: SigningCosmWasmClient | null;
-  setSecretjs: React.Dispatch<React.SetStateAction<SigningCosmWasmClient | null>>;
+  secretjs: SecretNetworkClient | null;
+  setSecretjs: React.Dispatch<React.SetStateAction<SecretNetworkClient | null>>;
   myAddress: SecretAddress | null;
   setMyAddress: React.Dispatch<React.SetStateAction<SecretAddress | null>>;
 }) {
@@ -51,7 +51,7 @@ export function KeplrPanel({
 export const chainId = "secret-4";
 
 async function setupKeplr(
-  setSecretjs: React.Dispatch<React.SetStateAction<SigningCosmWasmClient | null>>,
+  setSecretjs: React.Dispatch<React.SetStateAction<SecretNetworkClient | null>>,
   setMyAddress: React.Dispatch<React.SetStateAction<SecretAddress | null>>
 ) {
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -67,15 +67,14 @@ async function setupKeplr(
 
   const myAddress = accounts[0].address;
 
-  const secretjs = new SigningCosmWasmClient(
-    "https://bridge-api-manager.azure-api.net/",
-    myAddress,
+  const secretjs = await SecretNetworkClient.create({
+    chainId: chainId,
+    grpcWebUrl: "https://grpc.mainnet.secretsaturn.net",
     //@ts-ignore
-    keplrOfflineSigner,
-    window.getEnigmaUtils(chainId),
-    null,
-    BroadcastMode.Sync
-  );
+    wallet: keplrOfflineSigner,
+    walletAddress: myAddress,
+    encryptionUtils: window.getEnigmaUtils(chainId),
+  });
 
   setMyAddress(myAddress as SecretAddress);
   setSecretjs(secretjs);

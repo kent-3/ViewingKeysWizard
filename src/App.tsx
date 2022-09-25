@@ -21,8 +21,8 @@ import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import ReportProblemIcon from "@material-ui/icons/ReportProblem";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { SigningCosmWasmClient } from "secretjs";
-import { StdFee } from "secretjs/types/types";
+import { SecretNetworkClient, Wallet, MsgExecuteContractParams, MsgExecuteContract } from "secretjs";
+// import { StdFee } from "secretjs/types/types";
 import "./index.css";
 import { getKeplrViewingKey, KeplrPanel, setKeplrViewingKeys } from "./KeplrStuff";
 import { BasicToken, ComplexToken, SecretAddress, Token, tokenList as localTokens } from "./tokens";
@@ -98,7 +98,7 @@ export default function App() {
   const [isAllSelected, setIsAllSelected] = useState<boolean>(false);
   const [isSelectRelated, setSelectRelated] = useState<boolean>(false);
   const [myAddress, setMyAddress] = useState<SecretAddress | null>(null);
-  const [secretjs, setSecretjs] = useState<SigningCosmWasmClient | null>(null);
+  const [secretjs, setSecretjs] = useState<SecretNetworkClient | null>(null);
   const [isHelpDialogOpened, setIsHelpDialogOpened] = useState(false);
 
   useEffect(() => {
@@ -245,7 +245,7 @@ export default function App() {
         <Button
           variant="contained"
           color="primary"
-          disabled /* ={selectedTokens.size === 0 || !secretjs || loading || isTooMuchGas} */
+          disabled={selectedTokens.size === 0 || !secretjs || loading || isTooMuchGas}
           onClick={async () => {
             if (!secretjs) {
               console.error("Wat?");
@@ -262,22 +262,24 @@ export default function App() {
 
             setLoading(true);
             try {
-              const { transactionHash } = await secretjs.multiExecute(
-                tokensToSet.map(({ token, viewingKey }) => ({
-                  contractAddress: token,
-                  contractCodeHash: tokens.get(token)?.codeHash,
-                  handleMsg: { set_viewing_key: { key: viewingKey } },
-                })),
-                "",
-                getFeeForExecute(calculateGasLimit(selectedTokens.size))
+              const tx = await secretjs.tx.broadcast(
+                tokensToSet.map(({ token, viewingKey }) => (
+                  new MsgExecuteContract({
+                    sender: secretjs.address,
+                    contractAddress: token,
+                    codeHash: tokens.get(token)?.codeHash,
+                    msg: { set_viewing_key: { key: viewingKey } },
+                    sentFunds: [],
+                  })
+                )),
+                {gasLimit: (calculateGasLimit(selectedTokens.size))},
               );
 
               while (true) {
                 try {
-                  const tx = await secretjs.restClient.txById(transactionHash, true);
 
-                  if (!tx.raw_log.startsWith("[")) {
-                    console.error(`Tx failed: ${tx.raw_log}`);
+                  if (!tx.rawLog.startsWith("[")) {
+                    console.error(`Tx failed: ${tx.rawLog}`);
                   } else {
                     console.log(`Viewing keys successfully set.`);
                   }
@@ -499,13 +501,13 @@ export default function App() {
   );
 }
 
-const gasPriceUscrt = 0.25;
-export function getFeeForExecute(gas: number): StdFee {
-  return {
-    amount: [{ amount: String(Math.floor(gas * gasPriceUscrt) + 1), denom: "uscrt" }],
-    gas: String(gas),
-  };
-}
+// const gasPriceUscrt = 0.25;
+// export function getFeeForExecute(gas: number): StdFee {
+//   return {
+//     amount: [{ amount: String(Math.floor(gas * gasPriceUscrt) + 1), denom: "uscrt" }],
+//     gas: String(gas),
+//   };
+// }
 
 function TokenCheckBox({
   token,
