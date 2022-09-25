@@ -231,7 +231,7 @@ export default function App() {
       <Typography align="center" component="div" variant="h5" gutterBottom>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.3em" }}>
           <ReportProblemIcon />
-          <span>This app is broken until the next Keplr version comes out</span>
+          <span>This app is in still in development</span>
           <ReportProblemIcon />
         </div>
       </Typography>
@@ -262,35 +262,35 @@ export default function App() {
 
             setLoading(true);
             try {
-              const tx = await secretjs.tx.broadcast(
-                tokensToSet.map(({ token, viewingKey }) => (
-                  new MsgExecuteContract({
-                    sender: secretjs.address,
-                    contractAddress: token,
-                    codeHash: tokens.get(token)?.codeHash,
-                    msg: { set_viewing_key: { key: viewingKey } },
-                    sentFunds: [],
-                  })
-                )),
-                {gasLimit: (calculateGasLimit(selectedTokens.size))},
-              );
+              // const tx = await secretjs.tx.broadcast(
+              //   tokensToSet.map(({ token, viewingKey }) => (
+              //     new MsgExecuteContract({
+              //       sender: secretjs.address,
+              //       contractAddress: token,
+              //       codeHash: tokens.get(token)?.codeHash,
+              //       msg: { set_viewing_key: { key: viewingKey } },
+              //       sentFunds: [],
+              //     })
+              //   )),
+              //   {gasLimit: (calculateGasLimit(selectedTokens.size))},
+              // );
 
-              while (true) {
-                try {
+              // while (true) {
+              //   try {
 
-                  if (!tx.rawLog.startsWith("[")) {
-                    console.error(`Tx failed: ${tx.rawLog}`);
-                  } else {
-                    console.log(`Viewing keys successfully set.`);
-                  }
+              //     if (!tx.rawLog.startsWith("[")) {
+              //       console.error(`Tx failed: ${tx.rawLog}`);
+              //     } else {
+              //       console.log(`Viewing keys successfully set.`);
+              //     }
 
-                  break;
-                } catch (error) {
-                  console.log("Still waiting for tx to commit on-chain...");
-                }
+              //     break;
+              //   } catch (error) {
+              //     console.log("Still waiting for tx to commit on-chain...");
+              //   }
 
-                await sleep(5000);
-              }
+              //   await sleep(5000);
+              // }
 
               await setKeplrViewingKeys(tokensToSet);
             } catch (e: any) {
