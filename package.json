@@ -2,6 +2,9 @@
   "name": "viewing-keys-wizard",
   "description": "An awesome app to do awesome things",
   "version": "0.0.0",
+  "engines": {
+    "node": "16.x"
+  },
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
