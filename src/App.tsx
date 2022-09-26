@@ -69,9 +69,9 @@ ReactDOM.render(
         bottom: 0,
       }}
     >
-      <span style={{ marginRight: "0.3rem" }}>Made with</span>
+      <span style={{ marginRight: "0.3rem" }}>Forked with</span>
       <FavoriteIcon fontSize="small" color="secondary" />
-      <span style={{ margin: "0 0.3rem" }}>by SCRT Labs</span>
+      <span style={{ margin: "0 0.3rem" }}>from SCRT Labs</span>
       <a
         href="https://github.com/scrtlabs/ViewingKeysWizard"
         target="_blank"
